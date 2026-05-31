@@ -336,8 +336,12 @@
       await clerk.load();
 
       if (!clerk.user) {
-        // Not signed in — redirect silently to Microsoft OAuth
-        await clerk.redirectToSignIn({ redirectUrl: window.location.href });
+        // Not signed in — redirect directly to Microsoft OAuth
+        await clerk.authenticateWithRedirect({
+          strategy: 'oauth_microsoft',
+          redirectUrl: window.location.origin + '/sso-callback',
+          redirectUrlComplete: window.location.href,
+        });
         return;
       }
 

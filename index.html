@@ -331,37 +331,38 @@
     <footer>House of Finance &copy; 2026</footer>
   </div>
 
-  <!-- Clerk auth -->
-  <script src="https://humorous-corgi-34.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" crossorigin="anonymous"></script>
+  <!-- Clerk auth — loaded async, initialized on window load -->
+  <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key="pk_test_aHVtb3JvdXMtY29yZ2ktMzQuY2xlcmsuYWNjb3VudHMuZGV2JA"
+    src="https://humorous-corgi-34.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    type="text/javascript"
+  ></script>
   <script>
-    (async () => {
+    window.addEventListener('load', async function () {
       const loading = document.getElementById('auth-loading');
       try {
-        if (typeof window.Clerk === 'undefined') throw new Error('Clerk JS failed to load from CDN');
+        if (typeof window.Clerk === 'undefined') throw new Error('Clerk JS failed to load — check network');
 
-        const PUBLISHABLE_KEY = 'pk_test_aHVtb3JvdXMtY29yZ2ktMzQuY2xlcmsuYWNjb3VudHMuZGV2JA';
-        const clerk = new window.Clerk(PUBLISHABLE_KEY);
-        await clerk.load();
-
+        await window.Clerk.load();
         loading.style.display = 'none';
 
-        if (!clerk.user) {
-          await clerk.redirectToSignIn({ redirectUrl: window.location.href });
+        if (!window.Clerk.user) {
+          await window.Clerk.redirectToSignIn({ redirectUrl: window.location.href });
           return;
         }
 
         // Signed in — show the portal
         document.getElementById('view-portal').style.display = 'block';
 
-        // Show broker name in header
         const nameEl = document.getElementById('broker-name');
-        if (nameEl) nameEl.textContent = clerk.user.fullName || clerk.user.primaryEmailAddress?.emailAddress || '';
+        if (nameEl) nameEl.textContent = window.Clerk.user.fullName || window.Clerk.user.primaryEmailAddress?.emailAddress || '';
 
-        // Wire up sign-out button
         const signOutBtn = document.getElementById('btn-sign-out');
         if (signOutBtn) {
           signOutBtn.style.display = 'inline-block';
-          signOutBtn.addEventListener('click', () => clerk.signOut());
+          signOutBtn.addEventListener('click', () => window.Clerk.signOut());
         }
       } catch (e) {
         console.error('[clerk]', e);
@@ -370,7 +371,7 @@
           + 'onclick="document.getElementById(\'auth-loading\').style.display=\'none\';'
           + 'document.getElementById(\'view-portal\').style.display=\'block\'">continue anyway</a>';
       }
-    })();
+    });
   </script>
 
 </body>

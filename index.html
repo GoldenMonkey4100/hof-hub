@@ -282,6 +282,10 @@
     </div>
   </header>
 
+  <div id="auth-loading" style="display:flex; align-items:center; justify-content:center; min-height:calc(100vh - 72px); font-family:'Open Sans',sans-serif; font-size:13px; color:#6b6964;">
+    Authenticating…
+  </div>
+
   <div id="view-portal">
     <main>
       <p class="portal-eyebrow">Applications</p>
@@ -328,16 +332,20 @@
   </div>
 
   <!-- Clerk auth -->
-  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@clerk/clerk-js@5.58.0/dist/clerk.browser.js" crossorigin="anonymous"></script>
   <script>
     (async () => {
+      const loading = document.getElementById('auth-loading');
       try {
+        if (typeof window.Clerk === 'undefined') throw new Error('Clerk JS failed to load from CDN');
+
         const PUBLISHABLE_KEY = 'pk_test_aHVtb3JvdXMtY29yZ2ktMzQuY2xlcmsuYWNjb3VudHMuZGV2JA';
         const clerk = new window.Clerk(PUBLISHABLE_KEY);
         await clerk.load();
 
+        loading.style.display = 'none';
+
         if (!clerk.user) {
-          // Not signed in — redirect to Clerk's sign-in page (handles Microsoft OAuth)
           await clerk.redirectToSignIn({ redirectUrl: window.location.href });
           return;
         }
@@ -357,8 +365,10 @@
         }
       } catch (e) {
         console.error('[clerk]', e);
-        // Graceful fallback — show portal so the page is never blank
-        document.getElementById('view-portal').style.display = 'block';
+        loading.innerHTML = 'Auth error: ' + e.message
+          + ' &mdash; <a href="javascript:void(0)" style="color:#CBB26B" '
+          + 'onclick="document.getElementById(\'auth-loading\').style.display=\'none\';'
+          + 'document.getElementById(\'view-portal\').style.display=\'block\'">continue anyway</a>';
       }
     })();
   </script>

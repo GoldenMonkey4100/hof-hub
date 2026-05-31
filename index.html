@@ -331,32 +331,34 @@
   <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js" crossorigin="anonymous"></script>
   <script>
     (async () => {
-      const PUBLISHABLE_KEY = 'pk_test_aHVtb3JvdXMtY29yZ2ktMzQuY2xlcmsuYWNjb3VudHMuZGV2JA';
-      const clerk = new window.Clerk(PUBLISHABLE_KEY);
-      await clerk.load();
+      try {
+        const PUBLISHABLE_KEY = 'pk_test_aHVtb3JvdXMtY29yZ2ktMzQuY2xlcmsuYWNjb3VudHMuZGV2JA';
+        const clerk = new window.Clerk(PUBLISHABLE_KEY);
+        await clerk.load();
 
-      if (!clerk.user) {
-        // Not signed in — redirect directly to Microsoft OAuth
-        await clerk.authenticateWithRedirect({
-          strategy: 'oauth_microsoft',
-          redirectUrl: window.location.origin + '/sso-callback',
-          redirectUrlComplete: window.location.href,
-        });
-        return;
-      }
+        if (!clerk.user) {
+          // Not signed in — redirect to Clerk's sign-in page (handles Microsoft OAuth)
+          await clerk.redirectToSignIn({ redirectUrl: window.location.href });
+          return;
+        }
 
-      // Signed in — show the portal
-      document.getElementById('view-portal').style.display = 'block';
+        // Signed in — show the portal
+        document.getElementById('view-portal').style.display = 'block';
 
-      // Show broker name in header
-      const nameEl = document.getElementById('broker-name');
-      if (nameEl) nameEl.textContent = clerk.user.fullName || clerk.user.primaryEmailAddress?.emailAddress || '';
+        // Show broker name in header
+        const nameEl = document.getElementById('broker-name');
+        if (nameEl) nameEl.textContent = clerk.user.fullName || clerk.user.primaryEmailAddress?.emailAddress || '';
 
-      // Wire up sign-out button
-      const signOutBtn = document.getElementById('btn-sign-out');
-      if (signOutBtn) {
-        signOutBtn.style.display = 'inline-block';
-        signOutBtn.addEventListener('click', () => clerk.signOut());
+        // Wire up sign-out button
+        const signOutBtn = document.getElementById('btn-sign-out');
+        if (signOutBtn) {
+          signOutBtn.style.display = 'inline-block';
+          signOutBtn.addEventListener('click', () => clerk.signOut());
+        }
+      } catch (e) {
+        console.error('[clerk]', e);
+        // Graceful fallback — show portal so the page is never blank
+        document.getElementById('view-portal').style.display = 'block';
       }
     })();
   </script>

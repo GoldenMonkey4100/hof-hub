@@ -234,7 +234,7 @@
     }
 
     /* ── Auth loading state ── */
-    #view-portal { display: none; }
+    #view-portal { display: block; }
 
     .broker-name {
       font-family: 'Open Sans', sans-serif;
@@ -282,10 +282,6 @@
     </div>
   </header>
 
-  <div id="auth-loading" style="display:flex; align-items:center; justify-content:center; min-height:calc(100vh - 72px); font-family:'Open Sans',sans-serif; font-size:13px; color:#6b6964;">
-    Authenticating…
-  </div>
-
   <div id="view-portal">
     <main>
       <p class="portal-eyebrow">Applications</p>
@@ -331,48 +327,6 @@
     <footer>House of Finance &copy; 2026</footer>
   </div>
 
-  <!-- Clerk auth — loaded async, initialized on window load -->
-  <script
-    async
-    crossorigin="anonymous"
-    data-clerk-publishable-key="pk_live_Y2xlcmsuaG9mLWh1Yi52ZXJjZWwuYSQ"
-    src="https://clerk.hof-hub.vercel.app/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
-    type="text/javascript"
-  ></script>
-  <script>
-    window.addEventListener('load', async function () {
-      const loading = document.getElementById('auth-loading');
-      try {
-        if (typeof window.Clerk === 'undefined') throw new Error('Clerk JS failed to load — check network');
-
-        await window.Clerk.load();
-        loading.style.display = 'none';
-
-        if (!window.Clerk.user) {
-          await window.Clerk.redirectToSignIn({ redirectUrl: window.location.href });
-          return;
-        }
-
-        // Signed in — show the portal
-        document.getElementById('view-portal').style.display = 'block';
-
-        const nameEl = document.getElementById('broker-name');
-        if (nameEl) nameEl.textContent = window.Clerk.user.fullName || window.Clerk.user.primaryEmailAddress?.emailAddress || '';
-
-        const signOutBtn = document.getElementById('btn-sign-out');
-        if (signOutBtn) {
-          signOutBtn.style.display = 'inline-block';
-          signOutBtn.addEventListener('click', () => window.Clerk.signOut());
-        }
-      } catch (e) {
-        console.error('[clerk]', e);
-        loading.innerHTML = 'Auth error: ' + e.message
-          + ' &mdash; <a href="javascript:void(0)" style="color:#CBB26B" '
-          + 'onclick="document.getElementById(\'auth-loading\').style.display=\'none\';'
-          + 'document.getElementById(\'view-portal\').style.display=\'block\'">continue anyway</a>';
-      }
-    });
-  </script>
 
 </body>
 </html>
